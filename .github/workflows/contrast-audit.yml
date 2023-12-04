@@ -28,7 +28,7 @@ jobs:
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v4
       with:
-        cache: npm
+        #cache: npm #need a package-lock.json for this...
         node-version: ${{ matrix.node-version }}
     - run: npm install -g @contrast/contrast
     - name: Setup Java
