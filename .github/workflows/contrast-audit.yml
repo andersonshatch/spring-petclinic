@@ -1,0 +1,66 @@
+# This workflow will do a clean install of node dependencies, build the source code and run tests across different versions of node
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
+
+name: Contrast Audit
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [20.x]
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node-version }}
+    - name: Cache node modules
+      uses: actions/cache@v2
+      env:
+        cache-name: cache-node-modules
+      with:
+        # npm cache files are stored in `~/.npm` on Linux/macOS
+        path: ~/.npm
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-build-${{ env.cache-name }}-
+          ${{ runner.os }}-build-
+          ${{ runner.os }}-
+    - run: npm ci
+    - run: npm install -g @contrast/contrast
+    - name: Setup Java
+      uses: actions/setup-java@v3
+      with:
+        java-version: 11
+        distribution: temurin
+        cache: 'maven'
+
+    # Submit dependency details to legacy application dependency tree. Contrast SaaS or EoP.
+    - run: contrast audit --legacy --api-key $CONTRAST_API_KEY --authorization $CONTRAST_AUTHORIZATION --organization-id $CONTRAST_ORG_ID --host $CONTRAST_HOST --application-id $CONTRAST_APPLICATION_ID
+      name: Contrast OSS Submit - Dependency Tree
+      env:
+        CONTRAST_API_KEY: ${{ secrets.CONTRAST_API_KEY }}
+        CONTRAST_AUTHORIZATION: ${{ secrets.CONTRAST_AUTHORIZATION }}
+        CONTRAST_ORG_ID: ${{ secrets.CONTRAST_ORG_ID }}
+        CONTRAST_HOST: ${{ secrets.CONTRAST_HOST }}
+        CONTRAST_APPLICATION_ID: ${{ secrets.CONTRAST_APPLICATION_ID }}
+
+    # Submit dependency details to Projects tab. Contrast SaaS only.
+    - run: contrast audit --track --name spring-petclinic --api-key $CONTRAST_API_KEY --authorization $CONTRAST_AUTHORIZATION --organization-id $CONTRAST_ORG_ID --host $CONTRAST_HOST --fail --severity high
+      name: Contrast OSS Submit - Projects Tab
+      env:
+        CONTRAST_API_KEY: ${{ secrets.CONTRAST_API_KEY }}
+        CONTRAST_AUTHORIZATION: ${{ secrets.CONTRAST_AUTHORIZATION }}
+        CONTRAST_ORG_ID: ${{ secrets.CONTRAST_ORG_ID }}
+        CONTRAST_HOST: ${{ secrets.CONTRAST_HOST }}
+        CONTRAST_APPLICATION_ID: ${{ secrets.CONTRAST_APPLICATION_ID }}
