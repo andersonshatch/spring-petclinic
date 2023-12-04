@@ -36,7 +36,6 @@ jobs:
           ${{ runner.os }}-build-${{ env.cache-name }}-
           ${{ runner.os }}-build-
           ${{ runner.os }}-
-    - run: npm ci
     - run: npm install -g @contrast/contrast
     - name: Setup Java
       uses: actions/setup-java@v3
