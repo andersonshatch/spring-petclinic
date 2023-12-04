@@ -9,6 +9,11 @@ on:
   pull_request:
     branches: [ main ]
 
+env:
+  CONTRAST_APP_ID: 1cb14608-0eed-478e-b2cc-8bfd9f86254f
+  CONTRAST_ORG_ID: 9eb886b2-2cc8-4476-be35-d9fae474c47f
+  CONTRAST_URL: https://apptwo.contrastsecurity.com
+
 jobs:
   build:
 
@@ -45,21 +50,15 @@ jobs:
         cache: 'maven'
 
     # Submit dependency details to legacy application dependency tree. Contrast SaaS or EoP.
-    - run: contrast audit --legacy --api-key $CONTRAST_API_KEY --authorization $CONTRAST_AUTHORIZATION --organization-id $CONTRAST_ORG_ID --host $CONTRAST_HOST --application-id $CONTRAST_APPLICATION_ID
+    - run: contrast audit --legacy --api-key $CONTRAST_API_KEY --authorization $CONTRAST_AUTHORIZATION --organization-id $CONTRAST_ORG_ID --host $CONTRAST_HOST --application-id $CONTRAST_APP_ID
       name: Contrast OSS Submit - Dependency Tree
       env:
         CONTRAST_API_KEY: ${{ secrets.CONTRAST_API_KEY }}
         CONTRAST_AUTHORIZATION: ${{ secrets.CONTRAST_AUTHORIZATION }}
-        CONTRAST_ORG_ID: ${{ secrets.CONTRAST_ORG_ID }}
-        CONTRAST_HOST: ${{ secrets.CONTRAST_HOST }}
-        CONTRAST_APPLICATION_ID: ${{ secrets.CONTRAST_APPLICATION_ID }}
 
     # Submit dependency details to Projects tab. Contrast SaaS only.
-    - run: contrast audit --track --name spring-petclinic --api-key $CONTRAST_API_KEY --authorization $CONTRAST_AUTHORIZATION --organization-id $CONTRAST_ORG_ID --host $CONTRAST_HOST --fail --severity high
+    - run: contrast audit --track --name spring-petclinic --api-key $CONTRAST_API_KEY --authorization $CONTRAST_AUTHORIZATION --organization-id $CONTRAST_ORG_ID --host $CONTRAST_URL --fail --severity high
       name: Contrast OSS Submit - Projects Tab
       env:
         CONTRAST_API_KEY: ${{ secrets.CONTRAST_API_KEY }}
         CONTRAST_AUTHORIZATION: ${{ secrets.CONTRAST_AUTHORIZATION }}
-        CONTRAST_ORG_ID: ${{ secrets.CONTRAST_ORG_ID }}
-        CONTRAST_HOST: ${{ secrets.CONTRAST_HOST }}
-        CONTRAST_APPLICATION_ID: ${{ secrets.CONTRAST_APPLICATION_ID }}
