@@ -50,7 +50,7 @@ jobs:
         cache: 'maven'
 
     # Submit dependency details to legacy application dependency tree. Contrast SaaS or EoP.
-    - run: contrast audit --legacy --api-key $CONTRAST_API_KEY --authorization $CONTRAST_AUTHORIZATION --organization-id $CONTRAST_ORG_ID --host $CONTRAST_HOST --application-id $CONTRAST_APP_ID
+    - run: contrast audit --legacy --api-key $CONTRAST_API_KEY --authorization $CONTRAST_AUTHORIZATION --organization-id $CONTRAST_ORG_ID --host $CONTRAST_URL --application-id $CONTRAST_APP_ID
       name: Contrast OSS Submit - Dependency Tree
       env:
         CONTRAST_API_KEY: ${{ secrets.CONTRAST_API_KEY }}
