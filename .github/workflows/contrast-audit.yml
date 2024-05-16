@@ -55,4 +55,4 @@ jobs:
     - uses: actions/upload-artifact@v4
       with:
         name: contrast-sbom
-        path: *-sbom-CYCLONEDX.json
+        path: "*-sbom-CYCLONEDX.json"
