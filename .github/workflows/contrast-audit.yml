@@ -46,8 +46,13 @@ jobs:
         CONTRAST_AUTHORIZATION: ${{ secrets.CONTRAST_AUTHORIZATION }}
 
     # Submit dependency details to Projects tab. Contrast SaaS only.
-    - run: contrast audit --track --name spring-petclinic --api-key $CONTRAST_API_KEY --authorization $CONTRAST_AUTHORIZATION --organization-id $CONTRAST_ORG_ID --host $CONTRAST_URL #--fail --severity high
+    - run: contrast audit --track --name spring-petclinic --api-key $CONTRAST_API_KEY --authorization $CONTRAST_AUTHORIZATION --organization-id $CONTRAST_ORG_ID --host $CONTRAST_URL --save #--fail --severity high
       name: Contrast OSS Submit - Projects Tab
       env:
         CONTRAST_API_KEY: ${{ secrets.CONTRAST_API_KEY }}
         CONTRAST_AUTHORIZATION: ${{ secrets.CONTRAST_AUTHORIZATION }}
+
+    - uses: actions/upload-artifact@v4
+      with:
+        name: contrast-sbom
+        path: *-sbom-CYCLONEDX.json
