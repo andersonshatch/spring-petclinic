@@ -1,0 +1,58 @@
+# This workflow will do a clean install of node dependencies, build the source code and run tests across different versions of node
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
+
+name: Contrast Audit
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  CONTRAST_APP_ID: 1cb14608-0eed-478e-b2cc-8bfd9f86254f
+  CONTRAST_ORG_ID: 9eb886b2-2cc8-4476-be35-d9fae474c47f
+  CONTRAST_URL: https://apptwo.contrastsecurity.com
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [20.x]
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        #cache: npm #need a package-lock.json for this...
+        node-version: ${{ matrix.node-version }}
+    - run: npm install -g @contrast/contrast
+    - name: Setup Java
+      uses: actions/setup-java@v3
+      with:
+        java-version: 11
+        distribution: temurin
+        cache: 'maven'
+
+    # Submit dependency details to legacy application dependency tree. Contrast SaaS or EoP.
+    - run: contrast audit --legacy --api-key $CONTRAST_API_KEY --authorization $CONTRAST_AUTHORIZATION --organization-id $CONTRAST_ORG_ID --host $CONTRAST_URL --application-id $CONTRAST_APP_ID
+      name: Contrast OSS Submit - Dependency Tree
+      env:
+        CONTRAST_API_KEY: ${{ secrets.CONTRAST_API_KEY }}
+        CONTRAST_AUTHORIZATION: ${{ secrets.CONTRAST_AUTHORIZATION }}
+
+    # Submit dependency details to Projects tab. Contrast SaaS only.
+    - run: contrast audit --track --name spring-petclinic --api-key $CONTRAST_API_KEY --authorization $CONTRAST_AUTHORIZATION --organization-id $CONTRAST_ORG_ID --host $CONTRAST_URL --save #--fail --severity high
+      name: Contrast OSS Submit - Projects Tab
+      env:
+        CONTRAST_API_KEY: ${{ secrets.CONTRAST_API_KEY }}
+        CONTRAST_AUTHORIZATION: ${{ secrets.CONTRAST_AUTHORIZATION }}
+
+    - uses: actions/upload-artifact@v4
+      with:
+        name: contrast-sbom
+        path: "*-sbom-CYCLONEDX.json"
